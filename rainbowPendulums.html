@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <canvas id="paper"></canvas>
+    <style>
+      body {
+          margin: 0px;
+          padding: 0px;
+        }
+        #paper{
+          background: #1b1b1b;
+          width: 100vw;
+          height: 100vh;
+          padding: 50px;
+        }
+    </style>
+
+     
+    <script>
+const paper = document.querySelector("#paper"),
+      pen = paper.getContext("2d");
+let startTime = new Date().getTime();
+const colors = [
+  "#fa206f",
+  "#ca4d96",
+  "#ab6aae",
+  "#8b88c7",
+  "#7a98d4",
+  "#6ea3de",
+  "#48c7fc",
+  "#5feffd",
+  "#3af5d0",
+  "#2cf8be",
+  "#16fba2",
+  "#01ff89"
+];
+const music = colors.map( (color, index) => {
+  const audio = new Audio(`music/BeepBox-${index} (mp3cut.net).wav`);
+  
+  audio.volume = 0.15;
+  
+  return audio;
+});                       // Что-то из этого не работает 👆 👇🏻
+
+const playMusic = index => music[index].play();
+
+
+
+
+
+const draw = () => {
+  
+  paper.width = paper.clientWidth; 
+  paper.height = paper.clientHeight;
+  const start = {
+    x: paper.width * 0.1,
+    y: paper.height * 0.75
+  };
+  const end = {
+    x: paper.width * 0.9,
+    y: paper.height * 0.75
+  };
+  const center = {
+    x: paper.width* 0.5,  
+    y: paper.height * 0.75
+  }
+
+
+
+  pen.strokeStyle = "white";
+  pen.lineWidth = 6;
+  pen.beginPath();
+  pen.moveTo(start.x,start.y);
+  pen.lineTo(end.x,end.y);
+  pen.stroke();
+  
+  const time = 350; // Через это количество секунд маятники сойдутся воедино
+  
+  const currentTime = new Date().getTime(), // Текущее время
+        elapsedTime = (currentTime - startTime)/1000; // Пройденное время
+  
+  const lineLength = end.x - start.x ; 
+  const firstArcRadius = (lineLength)* 0.1,
+        spacing = (lineLength/2 - firstArcRadius) / colors.length;//Длина полоски
+    
+  pen.beginPath();
+  pen.arc(center.x,center.y,lineLength/2,Math.PI, 2*Math.PI);
+  pen.stroke();
+  // Цикл для отрисовки радиусов
+  colors.forEach((color, index)=>{
+    const numberOfLoops = 35 - index,
+          rasstoynie = Math.PI * numberOfLoops; 
+    const velocity = rasstoynie/time; //Скорость движения маятников
+    const radius = firstArcRadius + (index*spacing), // радиус круга
+          distance = Math.PI + (elapsedTime*velocity) , // угол, здесь сейчас находится круг
+          modDistance = distance % 2* Math.PI, // Магия
+          CorrectedDistance = modDistance >= Math.PI ? modDistance : 2*Math.PI - modDistance,
+          x = center.x + radius * Math.cos(CorrectedDistance), //Позиция маятника по Х
+          y = center.y+ radius * Math.sin(CorrectedDistance); 
+
+        
+    pen.lineWidth = 4;
+    pen.beginPath();
+    pen.strokeStyle = color;
+    pen.fillStyle = color; 
+    pen.moveTo(x, y);
+    pen.lineTo(center.x, center.y);
+    pen.strokeStyle = color;
+    pen.stroke();
+    });
+  // Цикл для отрисовки маятников
+  colors.forEach((color, index)=>{
+    const numberOfLoops = 35 - index,
+          rasstoynie = Math.PI * numberOfLoops; 
+    const velocity = rasstoynie/time; //Скорость движения маятников
+    const radius = firstArcRadius + (index*spacing), // радиус круга
+          distance = Math.PI + (elapsedTime*velocity) , // угол, здесь сейчас находится круг
+          modDistance = distance % 2* Math.PI, // Магия
+          CorrectedDistance = modDistance >= Math.PI ? modDistance : 2*Math.PI - modDistance,
+          x = center.x + radius * Math.cos(CorrectedDistance), //Позиция маятника по Х
+          y = center.y+ radius * Math.sin(CorrectedDistance); 
+  
+  
+    pen.beginPath();
+    pen.lineWidth = 2;
+    pen.strokeStyle = "white";
+    pen.fillStyle = "black"; 
+    pen.arc(x,y,(lineLength)*0.0095,0,2* Math.PI);
+    pen.fill();
+    pen.stroke(); 
+    if (distance% Math.PI ===0){
+      playMusic(index);
+    }
+      });
+
+    requestAnimationFrame(draw); // Запрашивает браузер обновлять draw() с частотой монитра
+  
+
+  
+};
+
+
+draw();
+    </script>
+  </body>
+</html>
